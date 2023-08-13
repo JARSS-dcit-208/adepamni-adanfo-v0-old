@@ -17,6 +17,12 @@
                     <div class="flex space-x-4">
                         <a href="{{ route('measurements.show', $measurement->id) }}" class="text-blue-500 hover:underline">View</a>
                         <a href="{{ route('measurements.edit', $measurement->id) }}" class="text-yellow-500 hover:underline">Edit</a>
+                        <!-- DELETE Button with Confirmation -->
+                        <form action="{{ route('measurements.destroy', $measurement->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this measurement?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-red-500 hover:underline">Delete</button>
+                        </form>
                     </div>
                 </div>
             </li>
