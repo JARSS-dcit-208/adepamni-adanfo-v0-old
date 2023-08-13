@@ -8,9 +8,14 @@ use Illuminate\Http\Request;
 class DesignController extends Controller
 {
     // Display a listing of the designs.
-    public function index()
+    public function index(Request $request)
     {
         $designs = Design::all();
+
+        if ($request->wantsJson()) {
+            return response()->json($designs);
+        }
+
         return view('designs.index', ['designs' => $designs]);
     }
 
@@ -25,17 +30,25 @@ class DesignController extends Controller
     {
         $validatedData = $request->validate([
             'customer_id' => 'required|exists:customers,id',
-            // Additional validation for other fields related to design.
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $design = Design::create($validatedData);
+
+        if ($request->wantsJson()) {
+            return response()->json($design, 201);
+        }
+
         return redirect()->route('designs.index')->with('success', 'Design added successfully.');
     }
 
     // Display the specified design's details.
-    public function show(Design $design)
+    public function show(Request $request, Design $design)
     {
+        if ($request->wantsJson()) {
+            return response()->json($design);
+        }
+
         return view('designs.show', ['design' => $design]);
     }
 
@@ -50,18 +63,27 @@ class DesignController extends Controller
     {
         $validatedData = $request->validate([
             'customer_id' => 'required|exists:customers,id',
-            // Additional validation for other fields related to design.
             'image' => 'sometimes|required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $design->update($validatedData);
+
+        if ($request->wantsJson()) {
+            return response()->json($design);
+        }
+
         return redirect()->route('designs.index')->with('success', 'Design updated successfully.');
     }
 
     // Remove the specified design from the database.
-    public function destroy(Design $design)
+    public function destroy(Request $request, Design $design)
     {
         $design->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json(null, 204);
+        }
+
         return redirect()->route('designs.index')->with('success', 'Design deleted successfully.');
     }
 }
