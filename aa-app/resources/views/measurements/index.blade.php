@@ -13,7 +13,8 @@
         @foreach ($measurements as $measurement)
             <li class="px-6 py-4 hover:bg-gray-50">
                 <div class="flex justify-between items-center">
-                    <span class="text-gray-700 font-medium">Measurements for: {{ $measurement->customer->name }}</span>
+                    <!-- Using an icon before customer's name -->
+                    <span class="text-gray-700"><i class="fas fa-user mr-2"></i><strong>{{ $measurement->customer->name }}</strong></span>
                     <div class="flex space-x-4">
                         <a href="{{ route('measurements.show', $measurement->id) }}" class="text-blue-500 hover:underline">View</a>
                         <a href="{{ route('measurements.edit', $measurement->id) }}" class="text-yellow-500 hover:underline">Edit</a>
