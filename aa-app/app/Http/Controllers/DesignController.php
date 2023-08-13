@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Design;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 
 class DesignController extends Controller
@@ -21,9 +22,11 @@ class DesignController extends Controller
 
     // Show the form for creating a new design.
     public function create()
-    {
-        return view('designs.create');
-    }
+{
+    $customers = Customer::all();
+    return view('designs.create', compact('customers'));
+}
+
 
     // Store a newly created design in the database.
     public function store(Request $request)
