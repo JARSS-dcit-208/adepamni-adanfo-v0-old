@@ -15,16 +15,30 @@ class DashboardController extends Controller
         // Fetching the summary statistics
         $totalCustomers = Customer::count();
         $totalDesigns = Design::count();
-        $totalMeasurements = Measurement::count();
-
+        $totalMeasurements = Measurement::count();  // Added this line
+    
         $quote = $this->getDailyQuote();
-
+    
         // Returning the view with all the required data
         return view('dashboard', [
             'quote' => $quote,
             'totalCustomers' => $totalCustomers,
             'totalDesigns' => $totalDesigns,
-            'totalMeasurements' => $totalMeasurements
+            'totalMeasurements' => $totalMeasurements,
+        ]);
+    }
+
+    public function search(Request $request) {
+        $query = $request->input('query');
+
+        // Search for matching customers and designs based on the query
+        $customers = Customer::where('name', 'like', '%' . $query . '%')->limit(5)->get();
+        $designs = Design::where('description', 'like', '%' . $query . '%')->limit(5)->get();
+
+        // Return the results as a JSON response
+        return response()->json([
+            'customers' => $customers,
+            'designs' => $designs
         ]);
     }
 

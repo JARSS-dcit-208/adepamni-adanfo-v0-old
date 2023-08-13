@@ -1,12 +1,22 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                {{ __('Dashboard') }}
+            </h2>
+
+            <!-- Search Bar -->
+            <div class="relative">
+                <input type="text" class="px-4 py-2 rounded-full" id="search-input" placeholder="Search customers or designs..." autocomplete="off">
+                <div id="search-results" class="absolute mt-2 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg z-50 hidden">
+                    <!-- Search results will be appended here -->
+                </div>
+            </div>
+        </div>
     </x-slot>
 
     @section('content')
-        <div class="py-12">
+    <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 
                 <!-- Quote Card -->
@@ -40,5 +50,48 @@
                 </div>
             </div>
         </div>
+
+    <!-- JavaScript for Search Functionality -->
+    <script>
+        document.getElementById('search-input').addEventListener('input', async function() {
+            let query = this.value.trim();
+
+            if (query.length) {
+                let response = await fetch(`/dashboard/search?query=${query}`);
+                let data = await response.json();
+
+                let resultsDiv = document.getElementById('search-results');
+                resultsDiv.innerHTML = '';  // Clear previous results
+
+                if (data.customers.length || data.designs.length) {
+                    // Append customers
+                    data.customers.forEach(customer => {
+                        resultsDiv.innerHTML += `<a href="/customers/${customer.id}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">${customer.name}</a>`;
+                    });
+
+                    // Append designs
+                    data.designs.forEach(design => {
+                        resultsDiv.innerHTML += `<a href="/designs/${design.id}" class="block px-4 py-2 text-gray-800 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">${design.description}</a>`;
+                    });
+
+                    resultsDiv.classList.remove('hidden');
+                } else {
+                    resultsDiv.classList.add('hidden');
+                }
+            } else {
+                document.getElementById('search-results').classList.add('hidden');
+            }
+        });
+
+        document.addEventListener('click', function(event) {
+            let searchInput = document.getElementById('search-input');
+            let searchResults = document.getElementById('search-results');
+
+            // Check if the click is outside both the search input and the results div
+            if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+                searchResults.classList.add('hidden');
+            }
+        });
+    </script>
     @endsection
 </x-app-layout>
