@@ -1,116 +1,34 @@
 @extends('layouts.app')
 
 @section('content')
-<h1>Edit Measurement for {{ $measurement->customer->name }}</h1>
+<div class="container mx-auto mt-10 p-4 lg:w-1/2 md:w-3/4 sm:w-full">
+    <h1 class="text-2xl mb-6 font-semibold text-center">Edit Measurement for {{ $measurement->customer->name }}</h1>
+    
+    <form action="{{ route('measurements.update', $measurement->id) }}" method="post" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        @csrf
+        @method('PUT')
 
-<form action="{{ route('measurements.update', $measurement->id) }}" method="post">
-    @csrf
-    @method('PUT')
+        <input type="hidden" name="customer_id" value="{{ $measurement->customer_id }}">
 
-    <input type="hidden" name="customer_id" value="{{ $measurement->customer_id }}">
+        @foreach(['height', 'weight', 'bust', 'waist', 'hips', 'back_waist_length', 'front_waist_length', 'shoulder_to_shoulder', 'chest_depth', 'armhole_depth', 'inseam', 'crotch_depth', 'neck_circumference', 'sleeve_length', 'bicep_circumference', 'forearm_circumference', 'thigh_circumference', 'knee_circumference', 'calf_circumference', 'ankle_circumference'] as $field)
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ $field }}">
+                @php 
+                // Convert snake_case to Title Case for labels
+                $label = ucwords(str_replace('_', ' ', $field));
+                echo $label;
+                @endphp
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="number" id="{{ $field }}" name="{{ $field }}" value="{{ $measurement->$field }}" step="0.01">
+        </div>
+        @endforeach
 
-    <div>
-        <label for="height">Height:</label>
-        <input type="number" id="height" name="height" value="{{ $measurement->height }}" step="0.01">
+        <div class="flex items-center justify-center mt-6">
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Update Measurement</button>
+        </div>
+    </form>
+    <div class="text-center mt-4">
+        <a href="{{ route('measurements.index') }}" class="text-blue-500 hover:underline">Back to Measurements List</a>
     </div>
-
-    <div>
-        <label for="weight">Weight:</label>
-        <input type="number" id="weight" name="weight" value="{{ $measurement->weight }}" step="0.01">
-    </div>
-
-    <div>
-        <label for="bust">Bust:</label>
-        <input type="number" id="bust" name="bust" value="{{ $measurement->bust }}" step="0.01">
-    </div>
-
-    <div>
-        <label for="waist">Waist:</label>
-        <input type="number" id="waist" name="waist" value="{{ $measurement->waist }}" step="0.01">
-    </div>
-
-    <div>
-        <label for="hips">Hips:</label>
-        <input type="number" id="hips" name="hips" value="{{ $measurement->hips }}" step="0.01">
-    </div>
-
-    <div>
-        <label for="back_waist_length">Back Waist Length:</label>
-        <input type="number" id="back_waist_length" name="back_waist_length" value="{{ $measurement->back_waist_length }}" step="0.01">
-    </div>
-
-    <div>
-        <label for="front_waist_length">Front Waist Length:</label>
-        <input type="number" id="front_waist_length" name="front_waist_length" value="{{ $measurement->front_waist_length }}" step="0.01">
-    </div>
-
-    <div>
-        <label for="shoulder_to_shoulder">Shoulder to Shoulder:</label>
-        <input type="number" id="shoulder_to_shoulder" name="shoulder_to_shoulder" value="{{ $measurement->shoulder_to_shoulder }}" step="0.01">
-    </div>
-
-    <div>
-        <label for="chest_depth">Chest Depth:</label>
-        <input type="number" id="chest_depth" name="chest_depth" value="{{ $measurement->chest_depth }}" step="0.01">
-    </div>
-
-    <div>
-        <label for="armhole_depth">Armhole Depth:</label>
-        <input type="number" id="armhole_depth" name="armhole_depth" value="{{ $measurement->armhole_depth }}" step="0.01">
-    </div>
-
-    <div>
-        <label for="inseam">Inseam:</label>
-        <input type="number" id="inseam" name="inseam" value="{{ $measurement->inseam }}" step="0.01">
-    </div>
-
-    <div>
-        <label for="crotch_depth">Crotch Depth:</label>
-        <input type="number" id="crotch_depth" name="crotch_depth" value="{{ $measurement->crotch_depth }}" step="0.01">
-    </div>
-
-    <div>
-        <label for="neck_circumference">Neck Circumference:</label>
-        <input type="number" id="neck_circumference" name="neck_circumference" value="{{ $measurement->neck_circumference }}" step="0.01">
-    </div>
-
-    <div>
-        <label for="sleeve_length">Sleeve Length:</label>
-        <input type="number" id="sleeve_length" name="sleeve_length" value="{{ $measurement->sleeve_length }}" step="0.01">
-    </div>
-
-    <div>
-        <label for="bicep_circumference">Bicep Circumference:</label>
-        <input type="number" id="bicep_circumference" name="bicep_circumference" value="{{ $measurement->bicep_circumference }}" step="0.01">
-    </div>
-
-    <div>
-        <label for="forearm_circumference">Forearm Circumference:</label>
-        <input type="number" id="forearm_circumference" name="forearm_circumference" value="{{ $measurement->forearm_circumference }}" step="0.01">
-    </div>
-
-    <div>
-        <label for="thigh_circumference">Thigh Circumference:</label>
-        <input type="number" id="thigh_circumference" name="thigh_circumference" value="{{ $measurement->thigh_circumference }}" step="0.01">
-    </div>
-
-    <div>
-        <label for="knee_circumference">Knee Circumference:</label>
-        <input type="number" id="knee_circumference" name="knee_circumference" value="{{ $measurement->knee_circumference }}" step="0.01">
-    </div>
-
-    <div>
-        <label for="calf_circumference">Calf Circumference:</label>
-        <input type="number" id="calf_circumference" name="calf_circumference" value="{{ $measurement->calf_circumference }}" step="0.01">
-    </div>
-
-    <div>
-        <label for="ankle_circumference">Ankle Circumference:</label>
-        <input type="number" id="ankle_circumference" name="ankle_circumference" value="{{ $measurement->ankle_circumference }}" step="0.01">
-    </div>
-
-    <button type="submit">Update Measurement</button>
-</form>
-
-<a href="{{ route('measurements.index') }}">Back to Measurements List</a>
+</div>
 @endsection

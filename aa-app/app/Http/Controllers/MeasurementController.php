@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Measurement;
-use App\Models\Customer; // Import the Customer model
+use App\Models\Customer;
 use Illuminate\Http\Request;
 
 class MeasurementController extends Controller
@@ -23,7 +23,7 @@ class MeasurementController extends Controller
     // Show the form for creating a new measurement.
     public function create()
     {
-        $customers = Customer::all(); // Fetch all customers
+        $customers = Customer::all();
         return view('measurements.create', compact('customers'));
     }
 
@@ -40,6 +40,30 @@ class MeasurementController extends Controller
         return redirect()->route('measurements.index')->with('success', 'Measurement added successfully.');
     }
 
+    // Display the specified measurement.
+    public function show(Measurement $measurement)
+    {
+        if (request()->wantsJson()) {
+            return response()->json($measurement);
+        }
+
+        return view('measurements.show', compact('measurement'));
+    }
+
+    // Show the form for editing the specified measurement.
+    public function edit($id)
+    {
+        $measurement = Measurement::find($id);
+        
+        if (!$measurement) {
+            return redirect()->route('measurements.index')->with('error', 'Measurement not found.');
+        }
+
+        $customers = Customer::all();
+        return view('measurements.edit', compact('measurement', 'customers'));
+    }
+
+    // Update the specified measurement in the database.
     public function update(Request $request, Measurement $measurement)
     {
         $validatedData = $this->validateRequest($request);
