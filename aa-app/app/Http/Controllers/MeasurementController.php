@@ -30,14 +30,22 @@ class MeasurementController extends Controller
     // Store a newly created measurement in the database.
     public function store(Request $request)
     {
-        $validatedData = $this->validateRequest($request);
-        $measurement = Measurement::create($validatedData);
+        $validatedData = $this->validateRequest($request, 'create');
+
+        // Check if a measurement already exists for the customer
+        $measurement = Measurement::firstWhere('customer_id', $validatedData['customer_id']);
+
+        if ($measurement) {
+            $measurement->update($validatedData);
+        } else {
+            $measurement = Measurement::create($validatedData);
+        }
 
         if ($request->wantsJson()) {
             return response()->json($measurement, 201);
         }
 
-        return redirect()->route('measurements.index')->with('success', 'Measurement added successfully.');
+        return redirect()->route('measurements.index')->with('success', 'Measurement added/updated successfully.');
     }
 
     // Display the specified measurement.
@@ -66,7 +74,7 @@ class MeasurementController extends Controller
     // Update the specified measurement in the database.
     public function update(Request $request, Measurement $measurement)
     {
-        $validatedData = $this->validateRequest($request);
+        $validatedData = $this->validateRequest($request, 'update');
         $measurement->update($validatedData);
 
         if ($request->wantsJson()) {
@@ -88,9 +96,9 @@ class MeasurementController extends Controller
         return redirect()->route('measurements.index')->with('success', 'Measurement deleted successfully.');
     }
 
-    private function validateRequest($request)
+    private function validateRequest($request, $action = 'create')
     {
-        return $request->validate([
+        $rules = [
             'customer_id' => 'required|exists:customers,id',
             'height' => 'required|numeric',
             'weight' => 'nullable|numeric',
@@ -112,6 +120,12 @@ class MeasurementController extends Controller
             'knee_circumference' => 'nullable|numeric',
             'calf_circumference' => 'nullable|numeric',
             'ankle_circumference' => 'nullable|numeric',
-        ]);
+        ];
+
+        if ($action === 'create') {
+            $rules['customer_id'] = 'required|exists:customers,id|unique:measurements,customer_id';
+        }
+
+        return $request->validate($rules);
     }
 }

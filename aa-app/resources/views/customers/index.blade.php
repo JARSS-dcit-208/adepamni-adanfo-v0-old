@@ -13,10 +13,22 @@
         @foreach ($customers as $customer)
             <li class="px-6 py-4 hover:bg-gray-50">
                 <div class="flex justify-between items-center">
-                    <span class="text-gray-700 font-medium">{{ $customer->name }}</span>
+                    <span class="text-gray-700 font-medium">
+                        {{ $customer->name }}
+                        @if(!is_null($customer->measurement))
+                            <span class="ml-2 inline-block bg-green-200 text-green-800 text-xs px-2 rounded-full uppercase font-semibold tracking-wide">Has Measurements</span>
+                        @endif
+                    </span>
                     <div class="flex space-x-4">
                         <a href="{{ route('customers.show', $customer->id) }}" class="text-blue-500 hover:underline">View</a>
                         <a href="{{ route('customers.edit', $customer->id) }}" class="text-yellow-500 hover:underline">Edit</a>
+                        
+                        <!-- Conditionally display the Add/Edit Measurement link -->
+                        @if(is_null($customer->measurement))
+                            <a href="{{ route('measurements.create') }}" class="text-green-500 hover:underline">Add Measurement</a>
+                        @else
+                            <a href="{{ route('measurements.edit', $customer->measurement->id) }}" class="text-green-500 hover:underline">Edit Measurement</a>
+                        @endif
                     </div>
                 </div>
             </li>

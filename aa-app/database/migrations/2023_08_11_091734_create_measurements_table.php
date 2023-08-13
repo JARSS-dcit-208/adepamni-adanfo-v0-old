@@ -10,7 +10,7 @@ class CreateMeasurementsTable extends Migration
     {
         Schema::create('measurements', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('customer_id');
+            $table->unsignedBigInteger('customer_id')->unique(); // Make customer_id unique
             $table->float('height')->nullable();
             $table->float('weight')->nullable();
             $table->float('bust')->nullable();
