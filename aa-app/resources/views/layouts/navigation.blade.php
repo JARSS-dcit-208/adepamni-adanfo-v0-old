@@ -15,6 +15,15 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
+                        {{ __('Customers') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('designs.index')" :active="request()->routeIs('designs.*')">
+                        {{ __('Designs') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('measurements.index')" :active="request()->routeIs('measurements.*')">
+                        {{ __('Measurements') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -69,6 +78,15 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
+                {{ __('Customers') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('designs.index')" :active="request()->routeIs('designs.*')">
+                {{ __('Designs') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('measurements.index')" :active="request()->routeIs('measurements.*')">
+                {{ __('Measurements') }}
             </x-responsive-nav-link>
         </div>
 
