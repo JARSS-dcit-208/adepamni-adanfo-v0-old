@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
+use App\Models\Design;
+use App\Models\Measurement;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
@@ -9,10 +12,20 @@ use Illuminate\Http\Request;
 class DashboardController extends Controller
 {
     public function index() {
+        // Fetching the summary statistics
+        $totalCustomers = Customer::count();
+        $totalDesigns = Design::count();
+        $totalMeasurements = Measurement::count();
+
         $quote = $this->getDailyQuote();
-        
-        // Here you can return the view for your dashboard and pass the quote data.
-        return view('dashboard', ['quote' => $quote]);
+
+        // Returning the view with all the required data
+        return view('dashboard', [
+            'quote' => $quote,
+            'totalCustomers' => $totalCustomers,
+            'totalDesigns' => $totalDesigns,
+            'totalMeasurements' => $totalMeasurements
+        ]);
     }
 
     private function getDailyQuote() {
