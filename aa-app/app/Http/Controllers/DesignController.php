@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Design;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;  // Ensure to include the Storage facade
 
 class DesignController extends Controller
 {
-    // Display a listing of the designs.
     public function index(Request $request)
     {
         $designs = Design::all();
@@ -20,21 +20,24 @@ class DesignController extends Controller
         return view('designs.index', ['designs' => $designs]);
     }
 
-    // Show the form for creating a new design.
     public function create()
-{
-    $customers = Customer::all();
-    return view('designs.create', compact('customers'));
-}
+    {
+        $customers = Customer::all();
+        return view('designs.create', compact('customers'));
+    }
 
-
-    // Store a newly created design in the database.
     public function store(Request $request)
     {
         $validatedData = $request->validate([
             'customer_id' => 'required|exists:customers,id',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'description' => 'required|string|max:500',
+            'photo_path' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+
+        if ($request->hasFile('photo_path')) {
+            $filePath = $request->file('photo_path')->store('designs', 'public');
+            $validatedData['photo_path'] = $filePath;
+        }
 
         $design = Design::create($validatedData);
 
@@ -45,7 +48,6 @@ class DesignController extends Controller
         return redirect()->route('designs.index')->with('success', 'Design added successfully.');
     }
 
-    // Display the specified design's details.
     public function show(Request $request, Design $design)
     {
         if ($request->wantsJson()) {
@@ -55,19 +57,30 @@ class DesignController extends Controller
         return view('designs.show', ['design' => $design]);
     }
 
-    // Show the form for editing the specified design.
     public function edit(Design $design)
-    {
-        return view('designs.edit', ['design' => $design]);
-    }
+{
+    $customers = Customer::all();
+    return view('designs.edit', ['design' => $design, 'customers' => $customers]);
+}
 
-    // Update the specified design in the database.
+
     public function update(Request $request, Design $design)
     {
         $validatedData = $request->validate([
             'customer_id' => 'required|exists:customers,id',
-            'image' => 'sometimes|required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'description' => 'required|string|max:500',
+            'photo_path' => 'sometimes|required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+
+        if ($request->hasFile('photo_path')) {
+            // Delete old photo if it exists
+            if ($design->photo_path) {
+                Storage::disk('public')->delete($design->photo_path);
+            }
+
+            $filePath = $request->file('photo_path')->store('designs', 'public');
+            $validatedData['photo_path'] = $filePath;
+        }
 
         $design->update($validatedData);
 
@@ -78,15 +91,20 @@ class DesignController extends Controller
         return redirect()->route('designs.index')->with('success', 'Design updated successfully.');
     }
 
-    // Remove the specified design from the database.
     public function destroy(Request $request, Design $design)
-    {
-        $design->delete();
-
-        if ($request->wantsJson()) {
-            return response()->json(null, 204);
-        }
-
-        return redirect()->route('designs.index')->with('success', 'Design deleted successfully.');
+{
+    // Delete the associated image from storage
+    if ($design->photo_path) {
+        Storage::disk('public')->delete($design->photo_path);
     }
+
+    // Delete the design from the database
+    $design->delete();
+
+    if ($request->wantsJson()) {
+        return response()->json(null, 204);
+    }
+
+    return redirect()->route('designs.index')->with('success', 'Design deleted successfully.');
+}
 }

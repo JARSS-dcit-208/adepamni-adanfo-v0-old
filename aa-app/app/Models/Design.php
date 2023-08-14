@@ -10,7 +10,7 @@ class Design extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'photo', 'description', 'customer_id'
+        'photo_path', 'description', 'customer_id'
     ];
 
     // Many-to-one relationship with Customer

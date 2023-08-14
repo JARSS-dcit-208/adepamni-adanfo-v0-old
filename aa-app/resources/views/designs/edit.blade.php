@@ -8,12 +8,6 @@
         @csrf
         @method('PUT')
         
-        <!-- Title Input -->
-        <div class="mb-4">
-            <label for="title" class="block text-gray-700 font-bold mb-2">Title:</label>
-            <input type="text" name="title" id="title" value="{{ $design->title }}" required class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-        </div>
-        
         <!-- Customer Select -->
         <div class="mb-4">
             <label for="customer_id" class="block text-gray-700 font-bold mb-2">Customer:</label>
@@ -23,14 +17,20 @@
                 @endforeach
             </select>
         </div>
+
+        <!-- Description Input -->
+        <div class="mb-4">
+            <label for="description" class="block text-gray-700 font-bold mb-2">Description:</label>
+            <textarea name="description" id="description" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">{{ $design->description }}</textarea>
+        </div>
         
         <!-- Design Photo Input -->
         <div class="mb-4">
             <label for="photo" class="block text-gray-700 font-bold mb-2">Design Photo:</label>
-            @if($design->photo)
-                <img src="{{ asset('storage/'.$design->photo) }}" alt="Design Photo" class="mb-3 w-full sm:w-2/3 md:w-1/2 lg:w-1/3 rounded shadow">
+            @if($design->photo_path)
+                <img src="{{ asset('storage/'.$design->photo_path) }}" alt="Design Photo" class="mb-3 w-full sm:w-2/3 md:w-1/2 lg:w-1/3 rounded shadow">
             @endif
-            <input type="file" name="photo" id="photo" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            <input type="file" name="photo_path" id="photo_path" class="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
         </div>
 
         <!-- Submit Button -->
