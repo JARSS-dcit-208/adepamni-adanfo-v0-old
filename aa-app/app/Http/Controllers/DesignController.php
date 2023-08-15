@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Design;
 use App\Models\Customer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;  // Ensure to include the Storage facade
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class DesignController extends Controller
 {
     public function index(Request $request)
     {
-        $designs = Design::all();
+        $designs = auth()->user()->designs;
 
         if ($request->wantsJson()) {
             return response()->json($designs);
@@ -22,14 +23,19 @@ class DesignController extends Controller
 
     public function create()
     {
-        $customers = Customer::all();
+        $customers = auth()->user()->customers;
         return view('designs.create', compact('customers'));
     }
 
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'customer_id' => 'required|exists:customers,id',
+            'customer_id' => [
+                'required',
+                Rule::exists('customers', 'id')->where(function ($query) {
+                    return $query->where('user_id', auth()->id());
+                }),
+            ],
             'description' => 'required|string|max:500',
             'photo_path' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -39,7 +45,7 @@ class DesignController extends Controller
             $validatedData['photo_path'] = $filePath;
         }
 
-        $design = Design::create($validatedData);
+        $design = auth()->user()->designs()->create($validatedData);
 
         if ($request->wantsJson()) {
             return response()->json($design, 201);
@@ -50,6 +56,10 @@ class DesignController extends Controller
 
     public function show(Request $request, Design $design)
     {
+        if ($design->user_id !== auth()->id()) {
+            abort(403, "You don't have permission to view this design.");
+        }
+
         if ($request->wantsJson()) {
             return response()->json($design);
         }
@@ -58,22 +68,33 @@ class DesignController extends Controller
     }
 
     public function edit(Design $design)
-{
-    $customers = Customer::all();
-    return view('designs.edit', ['design' => $design, 'customers' => $customers]);
-}
+    {
+        if ($design->user_id !== auth()->id()) {
+            abort(403, "You don't have permission to edit this design.");
+        }
 
+        $customers = auth()->user()->customers;
+        return view('designs.edit', ['design' => $design, 'customers' => $customers]);
+    }
 
     public function update(Request $request, Design $design)
     {
+        if ($design->user_id !== auth()->id()) {
+            abort(403, "You don't have permission to update this design.");
+        }
+
         $validatedData = $request->validate([
-            'customer_id' => 'required|exists:customers,id',
+            'customer_id' => [
+                'required',
+                Rule::exists('customers', 'id')->where(function ($query) {
+                    return $query->where('user_id', auth()->id());
+                }),
+            ],
             'description' => 'required|string|max:500',
             'photo_path' => 'sometimes|required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($request->hasFile('photo_path')) {
-            // Delete old photo if it exists
             if ($design->photo_path) {
                 Storage::disk('public')->delete($design->photo_path);
             }
@@ -92,19 +113,21 @@ class DesignController extends Controller
     }
 
     public function destroy(Request $request, Design $design)
-{
-    // Delete the associated image from storage
-    if ($design->photo_path) {
-        Storage::disk('public')->delete($design->photo_path);
+    {
+        if ($design->user_id !== auth()->id()) {
+            abort(403, "You don't have permission to delete this design.");
+        }
+
+        if ($design->photo_path) {
+            Storage::disk('public')->delete($design->photo_path);
+        }
+
+        $design->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json(null, 204);
+        }
+
+        return redirect()->route('designs.index')->with('success', 'Design deleted successfully.');
     }
-
-    // Delete the design from the database
-    $design->delete();
-
-    if ($request->wantsJson()) {
-        return response()->json(null, 204);
-    }
-
-    return redirect()->route('designs.index')->with('success', 'Design deleted successfully.');
-}
 }

@@ -15,6 +15,7 @@ class Measurement extends Model
      * @var array
      */
     protected $fillable = [
+        'user_id',
         'customer_id',
         'height', 
         'weight', 

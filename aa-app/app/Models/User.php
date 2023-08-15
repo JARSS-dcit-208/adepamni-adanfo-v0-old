@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -42,4 +41,28 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    /**
+     * Get the customers associated with the user.
+     */
+    public function customers()
+    {
+        return $this->hasMany(Customer::class);
+    }
+
+    /**
+     * Get the designs associated with the user.
+     */
+    public function designs()
+    {
+        return $this->hasMany(Design::class);
+    }
+
+    /**
+     * Get the measurements associated with the user.
+     */
+    public function measurements()
+    {
+        return $this->hasMany(Measurement::class);
+    }
 }

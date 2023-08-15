@@ -8,10 +8,15 @@ use Illuminate\Http\Request;
 
 class MeasurementController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth'); // Ensuring the user is authenticated for all methods
+    }
+
     // Display a listing of the measurements.
     public function index(Request $request)
     {
-        $measurements = Measurement::all();
+        $measurements = auth()->user()->measurements;
 
         if ($request->wantsJson()) {
             return response()->json($measurements);
@@ -23,34 +28,48 @@ class MeasurementController extends Controller
     // Show the form for creating a new measurement.
     public function create()
     {
-        $customers = Customer::all();
+        $customers = auth()->user()->customers;
         return view('measurements.create', compact('customers'));
     }
 
     // Store a newly created measurement in the database.
     public function store(Request $request)
-    {
-        $validatedData = $this->validateRequest($request, 'create');
+{
+    $validatedData = $this->validateRequest($request, 'create');
 
-        // Check if a measurement already exists for the customer
-        $measurement = Measurement::firstWhere('customer_id', $validatedData['customer_id']);
-
-        if ($measurement) {
-            $measurement->update($validatedData);
-        } else {
-            $measurement = Measurement::create($validatedData);
-        }
-
-        if ($request->wantsJson()) {
-            return response()->json($measurement, 201);
-        }
-
-        return redirect()->route('measurements.index')->with('success', 'Measurement added/updated successfully.');
+    // Ensure the customer belongs to the authenticated user
+    $customer = Customer::find($validatedData['customer_id']);
+    if (!$customer || $customer->user_id !== auth()->id()) {
+        return redirect()->route('measurements.index')->with('error', 'Unauthorized access.');
     }
+
+    // Add user_id to the validated data
+    $validatedData['user_id'] = auth()->id();
+
+    // Check if a measurement already exists for the customer
+    $measurement = Measurement::firstWhere('customer_id', $validatedData['customer_id']);
+
+    if ($measurement) {
+        $measurement->update($validatedData);
+    } else {
+        $measurement = Measurement::create($validatedData);
+    }
+
+    if ($request->wantsJson()) {
+        return response()->json($measurement, 201);
+    }
+
+    return redirect()->route('measurements.index')->with('success', 'Measurement added/updated successfully.');
+}
 
     // Display the specified measurement.
     public function show(Measurement $measurement)
     {
+        // Ensure the measurement belongs to the authenticated user
+        if ($measurement->user_id !== auth()->id()) {
+            return redirect()->route('measurements.index')->with('error', 'Measurement not found or unauthorized access.');
+        }
+
         if (request()->wantsJson()) {
             return response()->json($measurement);
         }
@@ -62,18 +81,23 @@ class MeasurementController extends Controller
     public function edit($id)
     {
         $measurement = Measurement::find($id);
-        
-        if (!$measurement) {
-            return redirect()->route('measurements.index')->with('error', 'Measurement not found.');
+
+        // Ensure the measurement belongs to the authenticated user
+        if (!$measurement || $measurement->user_id !== auth()->id()) {
+            return redirect()->route('measurements.index')->with('error', 'Measurement not found or unauthorized access.');
         }
 
-        $customers = Customer::all();
+        $customers = auth()->user()->customers;
         return view('measurements.edit', compact('measurement', 'customers'));
     }
 
     // Update the specified measurement in the database.
     public function update(Request $request, Measurement $measurement)
     {
+        if ($measurement->user_id !== auth()->id()) {
+            return redirect()->route('measurements.index')->with('error', 'Unauthorized access.');
+        }
+
         $validatedData = $this->validateRequest($request, 'update');
         $measurement->update($validatedData);
 
@@ -87,6 +111,10 @@ class MeasurementController extends Controller
     // Remove the specified measurement from the database.
     public function destroy(Request $request, Measurement $measurement)
     {
+        if ($measurement->user_id !== auth()->id()) {
+            return redirect()->route('measurements.index')->with('error', 'Unauthorized access.');
+        }
+
         $measurement->delete();
 
         if ($request->wantsJson()) {

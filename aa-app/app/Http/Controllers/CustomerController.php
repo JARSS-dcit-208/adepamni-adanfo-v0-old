@@ -10,7 +10,7 @@ class CustomerController extends Controller
     // Display a listing of the customers.
     public function index(Request $request)
     {
-        $customers = Customer::all();
+        $customers = auth()->user()->customers;
 
         if ($request->wantsJson()) {
             return response()->json($customers);
@@ -35,7 +35,7 @@ class CustomerController extends Controller
             'address' => 'required',
         ]);
 
-        $customer = Customer::create($validatedData);
+        $customer = auth()->user()->customers()->create($validatedData);
 
         if ($request->wantsJson()) {
             return response()->json($customer, 201);
@@ -47,6 +47,11 @@ class CustomerController extends Controller
     // Display the specified customer's details.
     public function show(Request $request, Customer $customer)
     {
+        // Ensure that the customer belongs to the authenticated user.
+        if ($customer->user_id !== auth()->id()) {
+            abort(403, "You don't have permission to view this customer.");
+        }
+
         if ($request->wantsJson()) {
             return response()->json($customer);
         }
@@ -57,12 +62,20 @@ class CustomerController extends Controller
     // Show the form for editing the specified customer.
     public function edit(Customer $customer)
     {
+        if ($customer->user_id !== auth()->id()) {
+            abort(403, "You don't have permission to edit this customer.");
+        }
+
         return view('customers.edit', ['customer' => $customer]);
     }
 
     // Update the specified customer in the database.
     public function update(Request $request, Customer $customer)
     {
+        if ($customer->user_id !== auth()->id()) {
+            abort(403, "You don't have permission to update this customer.");
+        }
+
         $validatedData = $request->validate([
             'name' => 'required|max:255',
             'email' => 'required|email|unique:customers,email,' . $customer->id,
@@ -82,6 +95,10 @@ class CustomerController extends Controller
     // Remove the specified customer from the database.
     public function destroy(Request $request, Customer $customer)
     {
+        if ($customer->user_id !== auth()->id()) {
+            abort(403, "You don't have permission to delete this customer.");
+        }
+
         $customer->delete();
 
         if ($request->wantsJson()) {

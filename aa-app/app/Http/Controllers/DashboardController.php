@@ -12,10 +12,10 @@ use Illuminate\Http\Request;
 class DashboardController extends Controller
 {
     public function index() {
-        // Fetching the summary statistics
-        $totalCustomers = Customer::count();
-        $totalDesigns = Design::count();
-        $totalMeasurements = Measurement::count();  // Added this line
+        // Fetching the summary statistics specific to the authenticated user
+        $totalCustomers = auth()->user()->customers()->count();
+        $totalDesigns = auth()->user()->designs()->count();
+        $totalMeasurements = auth()->user()->measurements()->count();
     
         $quote = $this->getDailyQuote();
     
@@ -31,9 +31,16 @@ class DashboardController extends Controller
     public function search(Request $request) {
         $query = $request->input('query');
 
-        // Search for matching customers and designs based on the query
-        $customers = Customer::where('name', 'like', '%' . $query . '%')->limit(5)->get();
-        $designs = Design::where('description', 'like', '%' . $query . '%')->limit(5)->get();
+        // Search for matching customers and designs based on the query specific to the authenticated user
+        $customers = auth()->user()->customers()
+            ->where('name', 'like', '%' . $query . '%')
+            ->limit(5)
+            ->get();
+
+        $designs = auth()->user()->designs()
+            ->where('description', 'like', '%' . $query . '%')
+            ->limit(5)
+            ->get();
 
         // Return the results as a JSON response
         return response()->json([
